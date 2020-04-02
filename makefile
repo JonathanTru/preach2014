@@ -1,2 +1,6 @@
+CC = g++
+CCFLAGS = -std=c++11 -g #-O3 
+
+
 all:
-	clang++ -std=c++11 -O3 -o preach++ main.cc ConstructionGraph.cc QueryGraph.cc Fifo.cc
+	$(CC) $(CCFLAGS) -o preach++ main.cc ConstructionGraph.cc QueryGraph.cc Fifo.cc

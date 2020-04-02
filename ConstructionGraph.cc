@@ -75,6 +75,61 @@ void ConstructionGraph::read(std::istream& in) {
   qg = std::unique_ptr<QueryGraph>(new QueryGraph(n));
 }
 
+void ConstructionGraph::readMetis(std::istream& in) {
+  std::string line;
+  std::getline(in,line);
+  //skip comments
+  while( line[0] == '%' ) {
+    std::getline(in, line);
+  }
+
+  std::stringstream ss(line);
+  ss >> n;
+  ss >> m;
+
+  num_sinks = n;
+  num_sources = n;
+  std::cout << "n, m:  " << n << ", " << m << "\n";
+
+  node_chl = NodeCHList(n);
+
+  fwd_edge_l = EdgeCHList(n);
+  bwd_edge_l = EdgeCHList(n);
+  unsigned int edge_counter = 0;
+  unsigned int node_counter = 0;
+
+  while (std::getline(in, line)) {
+
+    if (line[0] == '%') { // a comment in the file
+      continue;
+    }
+
+    std::stringstream ss(line);
+
+    unsigned int sid = node_counter++;
+    unsigned int tid;
+    while (ss >> tid) {
+      tid -= 1; // need to adjust for edge targets starting at 1
+      edge_counter++;
+      if (node_chl[sid].out == 0) {
+        num_sinks--;
+      }
+      node_chl[sid].out++;
+      if (node_chl[tid].in == 0) {
+        num_sources--;
+      }
+      node_chl[tid].in++;
+      addEdge(sid, tid);
+    }
+
+    if (in.eof()) {
+        break;
+    }
+  }
+
+  qg = std::unique_ptr<QueryGraph>(new QueryGraph(n));
+}
+
 int ConstructionGraph::levelFwdDfs(const int vid, int tree_size) {
   int level = qg->nodes[vid].fwd_level;
   NodeCH *tb;

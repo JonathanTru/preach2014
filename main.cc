@@ -10,6 +10,8 @@
 #include <memory>
 #include <chrono>
 #include <sys/time.h>
+#include <fstream>
+#include <vector>
 #include "ConstructionGraph.hh"
 
 using namespace std;
@@ -22,7 +24,7 @@ int main(int argc, char **argv) {
     return 0;
   }
   
-  float query_time;
+  // float query_time;
   struct timeval after_time, before_time;
   
   preach::ConstructionGraph cg;
@@ -32,7 +34,7 @@ int main(int argc, char **argv) {
     std::cout << "Error: cannot open " << argv[1] << std::endl;
     return -1;
   }
-  cg.read(infile);
+  cg.readMetis(infile);
   std::cout << "#DAG vertex size:" << cg.n;
   std::cout << "\t#DAG edges size:" << cg.m << std::endl;
 
@@ -55,12 +57,24 @@ int main(int argc, char **argv) {
   dur = chrono::duration_cast<us>(stop - start);
   cout << "sinks: " << cg.num_sinks << " ";
   cout << "sources: " << cg.num_sources << endl;
-  cout << "#construction time:" << dur.count()/1000.0 << " (ms)" << endl;
+  double init_time = dur.count()/1000000.0;
+
+  cout << "#construction time:" << init_time << " (s)" << endl;
   start = hrclock::now();
   int reached = qg->query(queries);
   stop = hrclock::now();
   dur = chrono::duration_cast<us>(stop - start);
+
+  cout << "#queries: " << num_queries << "\n";
   cout << "reached: " << reached << endl;
-  cout << "#total query running time:" << dur.count()/1000.0 << " (ms)" << endl;
+  double query_time = dur.count()/1000000.0;
+  cout << "#total query running time:" << query_time << " (s)" << endl;
+
+  ofstream outfile;
+  outfile.open("results_preach.csv", ios::out | ios::app);
+  outfile << argv[1] << "," << init_time << "," << query_time
+          << "," << query_time / queries.size() << "," << reached
+          << "\n";
+  outfile.close();
   return 0;
 }

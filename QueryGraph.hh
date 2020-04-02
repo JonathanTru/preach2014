@@ -10,6 +10,7 @@
 #ifndef PREACH_QUERYGRAPH_HH_
 #define PREACH_QUERYGRAPH_HH_
 #include <valarray>
+#include <vector>
 #include "Fifo.hh"
 
 namespace preach {

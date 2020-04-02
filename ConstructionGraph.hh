@@ -84,6 +84,7 @@ class ConstructionGraph {
   int num_sources;
 
   void read(std::istream&);
+  void readMetis(std::istream&);
   std::unique_ptr<QueryGraph> construct();
 };
 

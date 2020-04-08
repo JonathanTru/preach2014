@@ -1,5 +1,5 @@
 CC = g++
-CCFLAGS = -std=c++11 -g #-O3 
+CCFLAGS = -std=c++11 -O3 
 
 
 all:

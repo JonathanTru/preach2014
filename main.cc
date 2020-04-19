@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
 
   cout << "#queries: " << num_queries << "\n";
   cout << "reached: " << reached << endl;
-  double query_time = dur.count()/1000000.0;
+  double query_time = dur.count();
   cout << "#total query running time:" << query_time << " (s)" << endl;
 
   ofstream outfile;

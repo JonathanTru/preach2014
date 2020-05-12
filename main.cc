@@ -13,6 +13,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <string.h>
 #include "ConstructionGraph.hh"
 
 using namespace std;
@@ -21,8 +22,21 @@ using hrclock = chrono::high_resolution_clock;
 using us = chrono::microseconds;
 
 int main(int argc, char **argv) {
-  if (argc != 3) {
+  if (argc < 3) {
+    std::cout << "not enough arguments! Usage:\n./spreach <graphFile> <queryFile>\n";
     return 0;
+  }
+  bool onlyTrueQueries {false};
+  bool onlyFalseQueries {false};
+
+  if (argc > 3) {
+    if (strcmp(argv[3], "t") == 0) {
+      onlyTrueQueries = true;
+      std::cout << "only using queries from queryfile which should be successful\n";
+    } else if (strcmp(argv[3], "f") == 0) {
+      onlyFalseQueries = true;
+      std::cout << "only using queries from queryfile which should fail\n";
+    }
   }
   
   // float query_time;
@@ -55,7 +69,13 @@ int main(int argc, char **argv) {
     ss >> s;
     ss >> t;
     ss >> r;
-    queries.push_back({s,t,r});
+    if (onlyTrueQueries || onlyFalseQueries) {
+      if ( (onlyTrueQueries && r == 1) || (onlyFalseQueries && r == 0)) {
+        queries.push_back({s,t,r});
+      }
+    } else {
+      queries.push_back({s,t,r});
+    }
   }
 
   queries.pop_back();
@@ -70,20 +90,20 @@ int main(int argc, char **argv) {
   unique_ptr<preach::QueryGraph> qg = cg.construct();
   stop = hrclock::now();
   dur = chrono::duration_cast<us>(stop - start);
-  cout << "sinks: " << cg.num_sinks << " ";
-  cout << "sources: " << cg.num_sources << endl;
+  std::cout << "sinks: " << cg.num_sinks << " ";
+  std::cout << "sources: " << cg.num_sources << endl;
   double init_time = dur.count()/1000.0;
 
-  cout << "#construction time:" << init_time << " (ms)" << endl;
+  std::cout << "#construction time:" << init_time << " (ms)" << endl;
   start = hrclock::now();
   int reached = qg->query(queries);
   stop = hrclock::now();
   dur = chrono::duration_cast<us>(stop - start);
 
-  cout << "#queries: " << num_queries << "\n";
-  cout << "reached: " << reached << endl;
+  std::cout << "#queries: " << num_queries << "\n";
+  std::cout << "reached: " << reached << endl;
   double query_time = dur.count();
-  cout << "#total query running time:" << query_time << " (µs)" << endl;
+  std::cout << "#total query running time:" << query_time << " (µs)" << endl;
 
   for (std::size_t i = 0; i < num_queries; i++) {
     if (input_queries[i].r != queries[i].r) {
